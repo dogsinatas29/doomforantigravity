@@ -84,6 +84,21 @@ python3 main.py
 
 ---
 
-## 📄 License
-This project is licensed under the MIT License.
+## 🛠️ Development Environment | 개발 환경
+
+- **Style**: **100% Vibe Coding**
+- **AI Models**: **GEMINI 3 / GEMINI 2.5**
+- **Tools**: **GEMINI Cli / Antigravity**
+
+- **작업 방식**: **100% 바이브 코딩 (Vibe Coding)**
+- **사용 AI**: **GEMINI 3 / GEMINI 2.5**
+- **작업 도구**: **GEMINI Cli / Antigravity**
+
+---
+
+## 📄 License | 라이선스
+
+This project is licensed under the **MIT License**.
+이 프로젝트는 **MIT 라이선스**에 따라 배포됩니다.
+
 Copyright (c) 2026 Antigravity AI Team.
