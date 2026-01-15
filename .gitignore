@@ -1,0 +1,16 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.Python
+env/
+venv/
+.venv/
+assets/*.WAD
+!assets/DOOM1.WAD
+.vscode/
+.idea/
+.gemini/
+.agent/
+brain/
+*.log
