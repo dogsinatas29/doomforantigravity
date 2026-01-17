@@ -1,0 +1,65 @@
+{
+    "SHARP": {
+        "name_kr": "날카로운",
+        "name_en": "Sharp",
+        "allowed_types": ["WEAPON"],
+        "min_level": 1,
+        "to_hit_bonus_min": 5,
+        "to_hit_bonus_max": 10,
+        "damage_percent_min": 5,
+        "damage_percent_max": 10
+    },
+    "FINE": {
+        "name_kr": "정교한",
+        "name_en": "Fine",
+        "allowed_types": ["WEAPON", "ARMOR"],
+        "min_level": 5,
+        "to_hit_bonus_min": 10,
+        "to_hit_bonus_max": 20
+    },
+    "WARRIORS": {
+        "name_kr": "무사의",
+        "name_en": "Warrior's",
+        "allowed_types": ["WEAPON"],
+        "min_level": 10,
+        "damage_percent_min": 15,
+        "damage_percent_max": 25,
+        "to_hit_bonus_min": 10,
+        "to_hit_bonus_max": 15
+    },
+    "KINGS": {
+        "name_kr": "왕의",
+        "name_en": "King's",
+        "allowed_types": ["WEAPON"],
+        "min_level": 20,
+        "damage_percent_min": 30,
+        "damage_percent_max": 50,
+        "to_hit_bonus_min": 20,
+        "to_hit_bonus_max": 30
+    },
+    "FIRE": {
+        "name_kr": "화염의",
+        "name_en": "Fire",
+        "allowed_types": ["WEAPON"],
+        "min_level": 15,
+        "element": "FIRE",
+        "damage_percent_min": 10,
+        "damage_percent_max": 20
+    },
+    "RESISTANT": {
+        "name_kr": "저항하는",
+        "name_en": "Resistant",
+        "allowed_types": ["ARMOR", "SHIELD"],
+        "min_level": 5,
+        "res_all_min": 5,
+        "res_all_max": 10
+    },
+    "RUBY": {
+        "name_kr": "루비",
+        "name_en": "Ruby",
+        "allowed_types": ["ARMOR", "SHIELD"],
+        "min_level": 10,
+        "res_fire_min": 20,
+        "res_fire_max": 40
+    }
+}

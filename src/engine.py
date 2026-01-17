@@ -3,18 +3,19 @@ import time
 import termios
 import tty
 from src.ecs.world import World
-from src.ecs.components import Transform, Motion, PhysicsMode, Render, Wall
+from src.ecs.components import Transform, Motion, PhysicsMode, Render, Wall, Stats
 from src.utils.math_core import Vector3, PI
 from src.systems.input_sys import input_system
 from src.systems.physics_sys import physics_system
 from src.systems.render_sys import render_system
+from src.systems.ui_sys import ui_system
 from src.utils.wad_loader import WADLoader
 
 class GameEngine:
     def __init__(self):
         self.world = World()
         self.running = False
-        self.width = 100
+        self.width = 200
         self.height = 40
         self.frame_buffer = [[" " for _ in range(self.width)] for _ in range(self.height)]
         
@@ -22,6 +23,9 @@ class GameEngine:
         self.original_termios = None
         self.loader = None
         self.player_id = None
+        self.player_id = None
+        self.show_automap = False # Toggle via TAB
+        self.input_cooldown = 0.0 # Debounce timer
 
     def setup_terminal(self):
         """Set terminal to raw mode for non-blocking input."""
@@ -120,8 +124,8 @@ class GameEngine:
         """WAD 데이터를 읽어 그리드 맵으로 래스터화"""
         try:
             self.log(f"[*] Loading {map_name}...")
-            self.loader = WADLoader("assets/DOOM1.WAD")
-            verts, lines, things = self.loader.load_map_data(map_name)
+            self.loader = WADLoader("assets/Doom1.WAD")
+            verts, lines, things, sides = self.loader.load_map_data(map_name)
 
             # 1. Scaling (Doom 100 -> Engine 20)
             SCALE = 0.20
@@ -133,10 +137,17 @@ class GameEngine:
             
             map_w = int((max_x - min_x) * SCALE) + 20
             map_h = int((max_y - min_y) * SCALE) + 20
-            self.world.init_map(map_w, map_h)
+            
+            # Pass vector data to World for debug/automap/vector-render
+            self.world.init_map(map_w, map_h, verts, lines, sides)
+            self.world.map_bounds = (min_x, min_y, SCALE) # Store scaling info
+            
             self.log(f"[*] Map Scaled: {map_w}x{map_h} (Original Bounds: {min_x},{min_y} to {max_x},{max_y})")
 
             # 2. Rasterize LINEDEFS
+            # Import mapping helper
+            from src.utils.visual_assets import get_texture_id_from_name
+            
             for line in lines:
                 v1, v2 = verts[line[0]], verts[line[1]]
                 x1 = (v1[0] - min_x) * SCALE + 5
@@ -144,9 +155,18 @@ class GameEngine:
                 x2 = (v2[0] - min_x) * SCALE + 5
                 y2 = (v2[1] - min_y) * SCALE + 5
                 
-                # Use flags or sequence to vary textures for debug
-                tex_id = (line[2] % 3) + 1
-                self.rasterize_line(int(x1), int(y1), int(x2), int(y2), tex_id)
+                # Get Texture from Sidedef
+                # line format: (start, end, flags, right_side)
+                tex_idx = 1 # Default Wall
+                right_side_idx = line[3]
+                if right_side_idx != -1 and right_side_idx < len(sides):
+                    tex_name = sides[right_side_idx]['mid']
+                    # Register texture if new
+                    if tex_name not in self.world.texture_registry:
+                        self.world.texture_registry.append(tex_name)
+                    tex_idx = self.world.texture_registry.index(tex_name)
+
+                self.rasterize_line(int(x1), int(y1), int(x2), int(y2), tex_idx)
 
             # 3. Player Spawn
             player_start = next((t for t in things if t['type'] == 1), None)
@@ -156,7 +176,33 @@ class GameEngine:
                 p_trans = self.world.get_component(self.player_id, Transform)
                 p_trans.pos.x = px
                 p_trans.pos.y = py
-                p_trans.pos.z = 8.2 # Scaled eye height (41 * 0.2)
+                
+                # Safe Spawn Logic (Spiral Search)
+                # If spawn point is inside a wall (val > 0), search outward
+                if self.world.world_map[int(px)][int(py)] > 0:
+                    self.log(f"[!] Spawn ({int(px)},{int(py)}) is SOLID! Searching nearby...")
+                    found = False
+                    radius = 1
+                    while not found and radius < 10:
+                        for dx in range(-radius, radius + 1):
+                            for dy in range(-radius, radius + 1):
+                                nx, ny = int(px) + dx, int(py) + dy
+                                if 0 <= nx < self.world.map_width and 0 <= ny < self.world.map_height:
+                                    if self.world.world_map[nx][ny] == 0:
+                                        p_trans.pos.x = float(nx) + 0.5 # Center in cell
+                                        p_trans.pos.y = float(ny) + 0.5
+                                        px, py = p_trans.pos.x, p_trans.pos.y
+                                        found = True
+                                        self.log(f"[*] Safe Spawn Found at ({px}, {py})")
+                                        break
+                            if found: break
+                        radius += 1
+                
+                # Fix Eye Height (Was 20.0 -> Too High).
+                # Doom Guy Height ~56 units. Scale 0.2 -> 11.2
+                # Setting to 12.0 for standard eye level.
+                p_trans.pos.z = 12.0 
+                
                 p_trans.angle = (float(player_start['angle']) * PI) / 180.0
                 self.log(f"[*] Player at Grid ({px:.2f}, {py:.2f})")
             
@@ -176,13 +222,51 @@ class GameEngine:
         self.world.add_component(self.player_id, Motion(Vector3(), Vector3()))
         self.world.add_component(self.player_id, PhysicsMode())
         self.world.add_component(self.player_id, Render("@"))
+        # Phase 4: Init Stats for HUD
+        self.world.add_component(self.player_id, Stats(hp=100, armor=0, ammo=50, fuel=100.0))
         
         # Load the level map
+        self.loader = WADLoader("assets/Doom1.WAD")
+        self.load_wad_assets()
         self.load_level("E1M1")
         
         # Add systems
         self.world.add_system(input_system)
         self.world.add_system(physics_system)
+
+    def load_wad_assets(self):
+        """Load Sprites (Weapons) from WAD and convert to ASCII."""
+        try:
+            from src.utils.visual_assets import WEAPON_ASSETS
+            
+            # 1. Shotgun Sprites (SHTG)
+            # SHTGA0 (Idle), SHTGB0 (Fire), SHTGC0/D0 (Reload)
+            sprites = {
+                "SHOTGUN_IDLE": "SHTGA0",
+                "SHOTGUN_FIRE": "SHTGB0", 
+                "SHOTGUN_PUMP1": "SHTGC0",
+                "SHOTGUN_PUMP2": "SHTGD0"
+            }
+            
+            self.log("[*] Loading Weapon Sprites from WAD...")
+            
+            for key, lump_name in sprites.items():
+                data = self.loader.read_lump(lump_name)
+                if data:
+                    grid = self.loader.parse_patch(data)
+                    # Scale down: Doom 320x200 -> Terminal ~80x40
+                    # Weapon sprite ~100px width -> want ~30 chars? -> 0.3
+                    ascii_art = self.loader.patch_to_ascii(grid, scale_x=0.4, scale_y=0.2)
+                    if ascii_art:
+                        WEAPON_ASSETS[key] = ascii_art
+                        self.log(f"    - Loaded {lump_name} -> {len(ascii_art)} lines.")
+                    else:
+                         self.log(f"    - Failed to convert {lump_name}.")
+                else:
+                    self.log(f"    - Lump {lump_name} not found.")
+                    
+        except Exception as e:
+            self.log(f"[!] Asset Load Error: {e}")
 
     def run(self):
         try:
@@ -208,11 +292,19 @@ class GameEngine:
                 last_time = current_time
                 
                 # Update logic
+                if self.input_cooldown > 0:
+                    self.input_cooldown -= dt
                 self.world.update(dt, self)
                 
                 # Render
                 self.clear_buffer()
-                render_system(self.world, self, dt)
+                if self.show_automap:
+                     from src.systems.render_sys import render_automap
+                     render_automap(self.world, self)
+                else:
+                     render_system(self.world, self, dt)
+                     ui_system(self.world, self, dt) # Phase 4: UI Overlay
+                
                 self.render_to_terminal()
                 
                 # Cap FPS (approx 30 FPS)

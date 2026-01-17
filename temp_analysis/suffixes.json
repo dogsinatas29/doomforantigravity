@@ -1,0 +1,91 @@
+{
+    "OF_STRENGTH": {
+        "name_kr": "힘의",
+        "name_en": "of Strength",
+        "allowed_types": [
+            "WEAPON",
+            "ARMOR",
+            "ACCESSORY"
+        ],
+        "min_level": 1,
+        "str_bonus_min": 1,
+        "str_bonus_max": 3
+    },
+    "OF_DEXTERITY": {
+        "name_kr": "민첩의",
+        "name_en": "of Dexterity",
+        "allowed_types": [
+            "WEAPON",
+            "ARMOR",
+            "ACCESSORY"
+        ],
+        "min_level": 1,
+        "dex_bonus_min": 1,
+        "dex_bonus_max": 3
+    },
+    "OF_MAGIC": {
+        "name_kr": "마력의",
+        "name_en": "of Magic",
+        "allowed_types": [
+            "WEAPON",
+            "STAFF",
+            "ACCESSORY"
+        ],
+        "min_level": 1,
+        "mag_bonus_min": 1,
+        "mag_bonus_max": 3
+    },
+    "OF_VITALITY": {
+        "name_kr": "생명의",
+        "name_en": "of Vitality",
+        "allowed_types": [
+            "ARMOR",
+            "ACCESSORY"
+        ],
+        "min_level": 1,
+        "vit_bonus_min": 1,
+        "vit_bonus_max": 3
+    },
+    "OF_GIANT": {
+        "name_kr": "거인의",
+        "name_en": "of the Giant",
+        "allowed_types": [
+            "ARMOR",
+            "WEAPON"
+        ],
+        "min_level": 10,
+        "str_bonus_min": 5,
+        "str_bonus_max": 10,
+        "hp_bonus_min": 20,
+        "hp_bonus_max": 50
+    },
+    "OF_LEECH": {
+        "name_kr": "흡혈의",
+        "name_en": "of Leech",
+        "allowed_types": [
+            "WEAPON"
+        ],
+        "min_level": 15,
+        "life_leech_min": 3,
+        "life_leech_max": 5
+    },
+    "OF_DESTRUCTION": {
+        "name_kr": "파괴의",
+        "name_en": "of Destruction",
+        "allowed_types": [
+            "WEAPON"
+        ],
+        "min_level": 20,
+        "damage_max_bonus_min": 5,
+        "damage_max_bonus_max": 10
+    },
+    "OF_SPEED": {
+        "name_kr": "신속의",
+        "name_en": "of Speed",
+        "allowed_types": [
+            "WEAPON"
+        ],
+        "min_level": 10,
+        "attack_speed": 1
+    }
+}

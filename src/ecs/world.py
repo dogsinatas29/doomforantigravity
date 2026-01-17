@@ -1,8 +1,10 @@
 class World:
     def __init__(self):
-        self.entities = {}  # entity_id -> {component_type -> component_instance}
         self.next_entity_id = 0
+        self.entities = {} # id -> set(Component Types)
+        self.components = {} # Type -> {id -> Component}
         self.systems = []
+        self.texture_registry = ["EMPTY", "DEFAULT_WALL"] # 0=Empty, 1=Default
 
     def create_entity(self):
         entity_id = self.next_entity_id
@@ -37,11 +39,15 @@ class World:
             if all(ct in components for ct in component_types):
                 yield entity_id
 
-    def init_map(self, width, height):
+    def init_map(self, width, height, vertexes, linedefs, sidedefs):
         self.map_width = width
         self.map_height = height
-        # 0: empty, 1+: wall/texture
         self.world_map = [[0 for _ in range(height)] for _ in range(width)]
+        self.vertexes = vertexes
+        self.linedefs = linedefs
+        self.sidedefs = sidedefs
+        self.map_bounds = None
+        self.linedefs = linedefs if linedefs else []
 
     def create_wall(self, x1, y1, x2, y2, texture_id=1):
         from src.ecs.components import Wall

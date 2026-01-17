@@ -12,6 +12,7 @@ class Motion:
     vel: Vector3
     acc: Vector3
     friction: float = 0.9
+    bob_timer: float = 0.0
 
 @dataclass
 class Body:

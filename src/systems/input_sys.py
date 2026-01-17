@@ -17,10 +17,25 @@ def input_system(world, engine, dt):
         motion = world.get_component(player_id, Motion)
         
         # Movement speeds adjusted for grid-based scale (0.2 SCALE)
-        move_speed = 25.0 * dt 
-        rot_speed = 4.0 * dt
-        pitch_speed = 2.0 * dt
+        # Boosted based on user feedback (Was 8.0)
+        move_speed = 16.0 * dt 
+        rot_speed = 6.0 * dt
+        pitch_speed = 4.0 * dt
         
+        # Escape Sequence Detection for Arrow Keys
+        if key == '\x1b':
+            # Check if there are more characters to read immediately
+            if select.select([sys.stdin], [], [], 0) == ([sys.stdin], [], []):
+                seq = sys.stdin.read(2)
+                if seq == '[A': # UP Arrow
+                    transform.pitch += pitch_speed
+                elif seq == '[B': # DOWN Arrow
+                    transform.pitch -= pitch_speed
+                elif seq == '[C': # RIGHT Arrow
+                    transform.angle += rot_speed
+                elif seq == '[D': # LEFT Arrow
+                    transform.angle -= rot_speed
+
         if key == 'w':
             motion.vel.x += move_speed * get_cos(transform.angle)
             motion.vel.y += move_speed * get_sin(transform.angle)
@@ -56,5 +71,13 @@ def input_system(world, engine, dt):
         elif key == ' ':
             jump_speed = 1.2 # Scaled for grid height
             motion.vel.z += jump_speed
+        elif key == '\t': # TAB key
+            if engine.input_cooldown <= 0:
+                engine.show_automap = not engine.show_automap
+                engine.input_cooldown = 0.3 # 300ms debounce
         elif key == 'x' or key == '\x03' or key == '\x04':
             engine.running = False
+        
+        # Clamp Pitch (Prevent neck breaking)
+        # Limit to +/- 1.0 (approx 45 degrees visual tilt)
+        transform.pitch = max(-1.0, min(1.0, transform.pitch))

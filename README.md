@@ -12,6 +12,9 @@
 
 ## 🚀 Overview | 개요
 
+- **Procedural Texture Generation**: WAD 파일의 텍스처 이름을 분석하여 아스키 패턴을 실시간 생성 (Matrix Style).
+- **Scanline Rendering**: 바닥에 가로줄 스캔라인을 적용하여 속도감과 투시도 구현.
+- **Raycasting with Physics**: 그리드 기반 충돌 및 물리 엔진과 연동된 3D 뷰.
 - **Core Concept**: Classic Doom Resources + Quake Physics + Zero-G Mechanics.
 - **Rendering**: 100x40 ASCII Text Grid with DDA Raycasting.
 - **Constraints**: Zero-dependency (Python Standard Library only), Keyboard only.

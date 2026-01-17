@@ -166,3 +166,190 @@ DooM-AntigravitY/
 ​- Z-Shearing: 실제 3D Pitch 대신 렌더링 된 좌표를 위아래로 밀어 고개를 드는 효과 구현 (연산 효율 극대화).
 ​- PhysicsMode: 컴포넌트로 분리하여 ZERO_G 등 다양한 환경 전환 용이성 확보.
 
+
+# 📅 Weekend Sprint: The Engine Awakening
+> **Project:** DooM for AntigravitY  
+> **Goal:** Create a "Playable Prototype" with Core Rendering, Physics, and Visual Feedback.  
+> **Timeframe:** Weekend (Saturday - Sunday)
+
+---
+
+## 🛑 Phase 1: Foundation (기초 공사)
+**목표:** 터미널을 게임 엔진처럼 제어하고, ECS 루프를 가동한다.
+
+- [ ] **Terminal Setup (`engine.py`)**
+    - [ ] `100x40` 크기로 터미널 리사이즈 강제 명령 전송.
+    - [ ] 커서 숨김(`\033[?25l`) 및 Echo 끄기 설정.
+    - [ ] `atexit` 모듈을 이용한 프로그램 종료 시 터미널 복구 로직.
+
+- [ ] **Input Handling (`systems/input_sys.py`)**
+    - [ ] `termios` & `tty` 모듈을 이용한 Raw Mode 진입.
+    - [ ] 비차단(Non-blocking) `sys.stdin.read(1)` 구현.
+    - [ ] `WASD` + `Space` + `Shift` 동시 입력 처리용 `KeyBuffer` 딕셔너리 구현.
+
+- [ ] **ECS Core (`ecs/`)**
+    - [ ] `World` 클래스: 엔티티 생성/삭제 및 ID 발급.
+    - [ ] `Component` 데이터 클래스 정의 (`Transform`, `Motion`, `Stats`).
+
+---
+
+## 👁️ Phase 2: The Eye (렌더링 엔진)
+**목표:** 3D 벽을 화면에 그리고, '하이브리드 쉐이딩'의 질감을 확인한다.
+
+- [ ] **Double Buffering (`systems/render_sys.py`)**
+    - [ ] 100x40 크기의 `ScreenBuffer` (2차원 리스트) 생성.
+    - [ ] 이전 프레임과 비교 없이 통째로 덮어쓰는 `sys.stdout.write` 최적화.
+
+- [ ] **Raycasting Core**
+    - [ ] `DUMMY_MAP` (10x10 리스트) 기반의 DDA 알고리즘 구현.
+    - [ ] **Vertical Scaling (x2.5)**: 벽 높이 계산 시 `wall_height * 2.5` 적용.
+
+- [ ] **Hybrid Shading Implementation**
+    - [ ] `assets/visual_assets.py`에 쉐이딩 테이블 정의.
+        - `TEXTURE_CHARS` (질감용: `#`, `+`, `H`)
+        - `BLOCK_CHARS` (양감용: `█`, `▓`, `▒`)
+    - [ ] 거리(`dist`)와 벽 종류(`texture_id`)에 따른 문자 매핑 로직.
+    - [ ] **Noise Dithering**: 경계값에서 난수 섞기 적용.
+
+---
+
+## 🏃 Phase 3: The Body (물리 엔진)
+**목표:** 관성 이동을 느끼고, 중력 반전 시 화면이 뒤집히는지 확인한다.
+
+- [ ] **Basic Movement (`systems/physics_sys.py`)**
+    - [ ] 가속도(`acc`) → 속도(`vel`) → 위치(`pos`) 적분 로직.
+    - [ ] **Friction (마찰력)**: 입력이 없을 때 속도가 서서히 `0`으로 수렴하는 관성 구현.
+
+- [ ] **Gravity Modes**
+    - [ ] `Normal Mode`: `vel_z`에 `-9.8 * dt` 적용. 바닥 충돌 처리.
+    - [ ] `Zero-G Mode`: `vel_z` 중력 제거. 벽 충돌 시 속도 반전(Bounce).
+    - [ ] `Inverted Mode`: `vel_z`에 `+9.8 * dt` 적용. 천장 충돌 처리.
+
+- [ ] **Inverted Rendering**
+    - [ ] 중력 반전 상태일 때 `ScreenBuffer`를 `reverse()` 하여 출력하는 로직 연결.
+
+---
+
+## 💀 Phase 4: The Feel (비주얼 피드백)
+**목표:** 하드코어 얼굴과 샷건 애니메이션으로 타격감을 완성한다.
+
+- [ ] **Big-Face HUD (`systems/ui_sys.py`)**
+    - [ ] 높이 4줄짜리 아스키 얼굴 에셋(`assets/face_data.py`) 준비.
+    - [ ] HUD 템플릿에 현재 `hp`에 맞는 얼굴 배열 합성(Blit).
+
+- [ ] **Weapon Overlay (`systems/render_sys.py`)**
+    - [ ] **Shotgun Asset**: Idle, Fire, Pump-Action(Down/Up) 아스키 아트 준비.
+    - [ ] **Weapon State Machine**: `Input(Ctrl)` → `Fire` → `Reload` 상태 전이 로직.
+    - [ ] 3D 렌더링 후 버퍼 우측 하단에 무기 레이어 합성 (공백 투명 처리).
+
+---
+
+## ✅ Checkpoints (성공 기준)
+1.  **Friday Night**: 터미널에 `WASD` 입력 로그가 딜레이 없이 찍히는가?
+2.  **Saturday Noon**: 아스키 벽이 보이고, 거리에 따라 질감(블록+문자)이 변하는가?
+3.  **Saturday Night**: `Space`를 눌러 날아오르고, 중력을 반전시켰을 때 천장이 바닥이 되는가?
+4.  **Sunday Final**: 샷건을 발사(`Ctrl`)하면 "쾅" 하는 모션과 함께 얼굴이 반응하는가?
+
+# 🎨 Visual Polish & Advanced Rendering Specs
+
+## 1. 흑백 vs 컬러 모드 렌더링 전략
+### A. 블록 문자(Lighting) vs 특수 문자(Texture)
+블록 문자(`█`, `▓`, `▒`)는 명암 표현에 유리하지만 텍스처 질감이 부족하여 '울펜슈타인 3D'처럼 매끈해 보일 수 있습니다. 둠 특유의 거친(Gritty) 느낌을 위해 거리에 따라 문자를 혼합합니다.
+
+*   **Close (근거리)**: 텍스처 특징이 드러나는 문자 위주.
+    *   벽돌: `I`, `[`, `]`, `#`
+    *   기계: `+`, `=`, `-`, `%`
+*   **Mid (중거리)**: 블록 문자(`▓`, `▒`)를 섞어 덩어리감 표현.
+*   **Far (원거리)**: 흐린 블록(`░`)이나 점(`.`)으로 거리감 표현.
+
+**[렌더링 예시 비교]**
+```text
+(1) Plain Block (Too Clean)
+████████████
+▓▓▓▓▓▓▓▓▓▓▓▓
+▒▒▒▒▒▒▒▒▒▒▒▒
+
+(2) Doom Style Mix (Gritty)
+##|##|##|##|  <-- Close: Texture details
+▓▓#▓▓|▓▓#▓▓|  <-- Mid: Noise + Block
+▒▒▒▒▒▒▒▒▒▒▒▒  <-- Far: Darker
+```
+
+### B. 노이즈 디더링 (Noise Dithering)
+거리 단계 사이의 급격한 변화를 막고 모자이크 질감을 주기 위해 확률적으로 문자를 섞습니다.
+
+```python
+if distance < 2.0:
+    char = random.choice(["#", "|", "H"])
+elif distance < 4.0:
+    char = "█"
+elif distance < 6.0:
+    # 30% 확률로 더 어두운 문자 섞기
+    char = "▓" if random.random() > 0.3 else "▒"
+else:
+    char = "░"
+```
+
+## 2. ANSI Color System (The Atmosphere)
+형태보다 중요한 것은 **색감**입니다. xterm-256color를 적극 활용합니다.
+
+### Palette Strategy
+*   **Brown Strings (ANSI 94)**: 흙탕물, 녹슨 금속 (STARAN3).
+*   **Slime Green (ANSI 46/118)**: 독극물, 방사능 바닥.
+*   **Concrete Grey (ANSI 248)**: 차가운 기계벽 (TEKWALL).
+*   **Blood Red (ANSI 196)**: 피, 용암, 사망 시 화면 점멸.
+
+**[Color Map CSV Structure]**
+소스 코드 수정 없이 색감을 튜닝하기 위해 `color_map.csv`를 도입합니다.
+| tile_char | ansi_code | description |
+| :--- | :--- | :--- |
+| # | 94 | Brown Wall Base |
+| * | 160 | Explosion Red |
+
+## 3. Hardcore Big-Face HUD
+높이 4줄의 대형 아스키 아트를 사용하여 플레이어의 상태를 직관적으로 전달합니다.
+
+### Face States
+1.  **Healthy (100-80%)**: 단호함. `[===]`
+2.  **Pissed (79-60%)**: 찌푸림. `[---]`
+3.  **Bleeding (59-40%)**: 코피 흘림. `,,###,,`
+4.  **Messy (39-20%)**: 눈탱이 밤탱이. 한쪽 눈 부음 `o`.
+5.  **Critical (19-0%)**: 피칠갑. 식별 불가. (ANSI Red 필수).
+6.  **Evil Grin**: 무기 획득/학살 시. `[wWw]`
+
+### Layout Strategy
+```text
++------------------------------------------------------------------+
+|  AMMO   |  HEALTH  |    .-------.     |  ARMOR   |   KEYS    |
+|   042   |   086%   |   /  _   _  \    |   100%   |   [R]     |
+|  SHELLS |  NORMAL  |   |  ■ | ■  |    |  SHIELD  |    B      |
+|         |          |   \  [===]  /    |          |    Y      |
++------------------------------------------------------------------+
+```
+
+## 4. Weapon Overlay & Animation
+3D 뷰포트 위에 합성되는 2D 레이어로, '움직임'이 핵심입니다.
+
+*   **Chainsaw**: 아이들 상태에서 톱날 문자(`~`, `-`, `=`)가 진동. 발사 시 Zoom-In.
+*   **Shotgun**: 우측 하단에서 중앙으로 뻗는 사선 디자인. 발사 시 **Muzzle Flash**(`*` 섬광) + **Recoil**(총 들림).
+*   **Rocket Launcher**: 발사 시 포구 연기(`@`) + 화면 전체 반동(Kickback).
+
+## 5. Visual Effects (VFX) & Fog
+### VFX
+*   **Muzzle Flash**: 발사 순간 화면 전체 명도 높임.
+*   **Damage Flash**: 피격 시 ANSI Red 배경으로 1프레임 점멸.
+*   **Gravity Flip**: 중력 반전 시 렌더링 버퍼 `reverse()`로 즉시 상하 반전.
+
+### Fog System: Red Mist (The Hell Atmosphere)
+지옥의 붉은 안개를 표현하기 위해 바닥(Floor) 렌더링을 완전히 교체합니다.
+
+1.  **안개 타일링 (Fog Tiling)**
+    *   바닥을 면으로 채우지 않고, 흐릿한 아스키 문자(`.` `,` `~`)를 무작위로 섞어서 배치합니다.
+2.  **Living Fog (Animation)**
+    *   **Noise Effect**: 매 프레임마다 안개 타일의 위치를 조금씩 흔들거나(Jitter) 문자를 교체하여, 바닥에서 독기가 피어오르는 듯한 애니메이션을 구현합니다.
+3.  **Color Gradient (Depth)**
+    *   **Near**: Bright Red. 농도가 짙음.
+    *   **Far**: Dark Red / Black. 어둠 속으로 페이드 아웃.
+4.  **Implementation Logic**
+    *   `RenderSystem`에서 벽을 그리고 남은 하단 영역을 `Floor Segment`로 인식.
+    *   해당 영역에 Loop를 돌며 `Red Mist` 렌더링 함수를 호출.
