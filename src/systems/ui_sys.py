@@ -1,6 +1,6 @@
 
 from src.ecs.components import Transform, Stats
-from src.utils.visual_assets import FACE_ASSETS, WEAPON_ASSETS, ANSI_COLORS
+from src.utils.visual_assets import FACE_ASSETS, ASCII_WEAPONS, ANSI_COLORS
 
 def ui_system(world, engine, dt):
     """
@@ -28,33 +28,9 @@ def ui_system(world, engine, dt):
         # Use Bright White for max contrast
         engine.frame_buffer[cy][cx] = ANSI_COLORS["WHITE"] + "+" + ANSI_COLORS["RESET"]
 
-    # 1. Weapon Overlay (Render BEFORE HUD)
-    # -------------------------------------
-    # Draw weapon CENTERED at bottom
-    
-    weapon_key = "SHOTGUN_IDLE"
-    weapon_sprite = WEAPON_ASSETS.get(weapon_key, [])
-    
-    if weapon_sprite:
-        sprite_h = len(weapon_sprite)
-        sprite_w = len(weapon_sprite[0]) if sprite_h > 0 else 0
-        
-        # Position: Center align
-        # Y: Bottom of Viewport (Height - HUD - SpriteHeight)
-        start_y = engine.height - hud_height - sprite_h
-        # X: Center
-        start_x = (engine.width // 2) - (sprite_w // 2)
-        
-        for r, row_str in enumerate(weapon_sprite):
-            draw_y = start_y + r
-            if 0 <= draw_y < (engine.height - hud_height):
-                for c, char in enumerate(row_str):
-                    draw_x = start_x + c
-                    if 0 <= draw_x < engine.width:
-                        # WAD Converter uses " " for transparent?
-                        # Check wad_loader: it returns " " for None.
-                        if char != " ": 
-                            engine.frame_buffer[draw_y][draw_x] = char
+    # 1. Weapon Overlay REMOVED
+    # Handled by render_sys.py using WAD Sprites
+    pass
 
     # 2. HUD Logic (Bottom Area)
     # --------------------------
@@ -81,20 +57,10 @@ def ui_system(world, engine, dt):
     
     face_sprite = FACE_ASSETS.get(face_key, FACE_ASSETS["HEALTHY"])
     
-    # Draw HUD Frame
+    # Draw HUD Frame REMOVED
+    # Handled by render_sys.py using STBAR texture
     hud_start_y = engine.height - hud_height
-    
-    # Fill HUD background
-    for y in range(hud_start_y, engine.height):
-        # Draw border
-        if y == hud_start_y:
-            line_str = "+" + "-" * (engine.width - 2) + "+"
-        else:
-             line_str = "|" + " " * (engine.width - 2) + "|"
-             
-        for x, char in enumerate(line_str):
-            if x < engine.width:
-                engine.frame_buffer[y][x] = char
+    pass
 
     # Draw Data
     # Helper to write string at pos
@@ -119,10 +85,7 @@ def ui_system(world, engine, dt):
     draw_text(engine.width - 25, hud_start_y + 1, "ARMOR")
     draw_text(engine.width - 25, hud_start_y + 2, f"{armor}%")
 
-    # FACE (Center)
-    face_x = engine.width // 2 - 8
-    face_y = hud_start_y + 1
-    
-    for r, row_str in enumerate(face_sprite):
-        draw_text(face_x, face_y + r, row_str)
+    # FACE (Center) -> DRAWN BY RENDER_SYS (Texture)
+    # Legacy ASCII Face removed to avoid conflict
+    pass
 

@@ -19,37 +19,56 @@ ANSI_COLORS = {
     "DIM_SILVER": "\033[38;5;245m",  # Darker Silver
 }
 
-# --- 2. Texture Styles (Doom Gritty Mix v2: Expanded Depth) ---
-# Key: Texture ID (Arbitrary mapping from WAD)
-# Value: Dictionary of character sets for distances
+# Background Colors (Solid Walls)
+ANSI_BG_COLORS = {
+    "RESET": "\033[49m",
+    "BROWN": "\033[48;5;94m",     # Brown Background
+    "DARK_BROWN": "\033[48;5;58m", # Dark Brown Background
+    "GREY": "\033[48;5;240m",      # Grey Background
+    "DARK_GREY": "\033[48;5;236m", # Dark Grey Background
+    "SILVER": "\033[48;5;250m",    # Silver BG
+    "DARK_SILVER": "\033[48;5;245m",
+    "BLACK": "\033[48;5;232m",     # Black BG
+}
+
+# Composite Styles (High Contrast: FG ONLY)
+WALL_STYLES = {
+    # 1. BRICK (Brown)
+    "BROWN_LIGHT":  ANSI_COLORS["WHITE"],      # Lit Face (Bright)
+    "BROWN_SHADOW": ANSI_COLORS["BROWN_WALL"], # Side/Shadow Face (Dim)
+    
+    # 2. METAL (Grey)
+    "GREY_LIGHT":   ANSI_COLORS["WHITE"],
+    "GREY_SHADOW":  ANSI_COLORS["GREY_WALL"],
+    
+    # 3. TECH (Silver)
+    "SILVER_LIGHT": ANSI_COLORS["WHITE"],      # Bright Silver
+    "SILVER_SHADOW":ANSI_COLORS["DIM_GREY"],   # Dim Silver
+}
+
+# --- 2. Texture Styles (Doom High Contrast Characters) ---
+# Key: Texture ID
 TEXTURE_STYLES = {
-    1: { # BRICK (Brown)
-        # Simplified: Single char per band to remove "Static/Noise"
-        "chars_close":      ["█"],  
-        "chars_near_mid":   ["▓"],  
-        "chars_mid":        ["▒"],  
-        "chars_far":        ["░"],  
-        "chars_very_far":   ["."],  
-        "color": ANSI_COLORS["BROWN_WALL"],
-        "dim_color": ANSI_COLORS["DIM_BROWN"] 
+    # 1: BRICK Patterns (No Numbers)
+    1: {
+        "chars_close": "##H==", # Heavy
+        "chars_mid": "#|:.",   # Mid
+        "chars_far": ":.",     # Far
+        "chars_very_far": " "
     },
-    2: { # METAL (Grey)
-        "chars_close":      ["█"],  
-        "chars_near_mid":   ["▓"],  
-        "chars_mid":        ["▒"],  
-        "chars_far":        ["░"],  
-        "chars_very_far":   ["."],  
-        "color": ANSI_COLORS["GREY_WALL"],
-        "dim_color": ANSI_COLORS["DIM_GREY"]
+    # 2: METAL Patterns
+    2: {
+        "chars_close": "//#==", 
+        "chars_mid": "/|:.",
+        "chars_far": ":.",
+        "chars_very_far": " "
     },
-    3: { # DOOR / SPECIAL (Silver)
-        "chars_close":      ["█"],  
-        "chars_near_mid":   ["▓"],  
-        "chars_mid":        ["▒"],  
-        "chars_far":        ["░"],  
-        "chars_very_far":   ["."],  
-        "color": ANSI_COLORS["SILVER"],
-        "dim_color": ANSI_COLORS["DIM_SILVER"]
+    # 3: TECH Patterns
+    3: {
+        "chars_close": "[]##=",
+        "chars_mid": "[|:.",
+        "chars_far": ":.",
+        "chars_very_far": " "
     }
 }
 
@@ -110,12 +129,11 @@ FACE_ASSETS = {
 
 # --- [WEAPON ASSETS] ---
 # Imitating Doom Sprite Frames (SHTGA0, SHTGB0...)
-WEAPON_ASSETS = {
+ASCII_WEAPONS = {
     "SHOTGUN_IDLE": [
-        "      _  ",
-        "     / \ ",
-        "====|   |",
-        "    |   |",
+        "  _ ",
+        " / \\",
+        "=| |",
     ],
     "SHOTGUN_FIRE": [
         "   * BOOM * ",

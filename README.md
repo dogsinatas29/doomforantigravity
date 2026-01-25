@@ -4,6 +4,18 @@
 [![Python](https://img.shields.io/badge/python-3.8%2B-blue.svg)](https://www.python.org/)
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](LICENSE)
 
+# ⚡ Core Principle: Simplicity
+
+> **Simple != Easy**
+>
+> We prioritize **Simplicity** above all else. This implies the **Single Responsibility Principle**: *One module, one job.* This is the bedrock of our ECS architecture.
+>
+> **단순함 ≠ 쉬움**
+>
+> 우리는 **단순함(Simple)**을 최우선으로 둡니다. 이는 **단일 책임 원칙(One module, one job)**을 의미하며, 하나의 모듈은 오직 하나의 역할만 수행해야 합니다. 이것이 우리 ECS 아키텍처의 기반입니다.
+
+---
+
 **DooM for AntigravitY** is a high-performance ASCII 3D game engine that blends classic Doom resources with Quake-inspired physics and zero-gravity mechanics. Built entirely with the Python standard library, it brings a retro-futuristic combat experience to the terminal.
 
 **DooM for AntigravitY**는 클래식 둠 리소스, 퀘이크 스타일의 물리 엔진, 그리고 무중력 메커니즘을 결합한 고성능 ASCII 3D 게임 엔진입니다. 파이썬 표준 라이브러리만을 사용하여 터미널 환경에서 레트로 퓨처리즘 전투 경험을 선사합니다.

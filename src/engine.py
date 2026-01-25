@@ -1,4 +1,5 @@
 import sys
+import math
 import time
 import termios
 import tty
@@ -15,9 +16,15 @@ class GameEngine:
     def __init__(self):
         self.world = World()
         self.running = False
-        self.width = 200
-        self.height = 40
+        self.width = 120  # Terminal Width
+        self.height = 40  # Terminal Height
         self.frame_buffer = [[" " for _ in range(self.width)] for _ in range(self.height)]
+        
+        # [High-Res Internal Buffer]
+        # Braille is 2x4 dots per character.
+        self.vw = self.width * 2
+        self.vh = self.height * 4
+        self.virtual_buffer = [[None for _ in range(self.vw)] for _ in range(self.vh)]
         
         # Terminal state
         self.original_termios = None
@@ -97,21 +104,18 @@ class GameEngine:
         self.log("---------------------------------")
 
     def rasterize_line(self, x0, y0, x1, y1, texture_id):
-        """Bresenham's algorithm to fill world_map grid."""
+        # 브레전험 알고리즘으로 world_map 채우기
+        x0, y0, x1, y1 = int(x0), int(y0), int(x1), int(y1)
         dx = abs(x1 - x0)
         dy = abs(y1 - y0)
         sx = 1 if x0 < x1 else -1
         sy = 1 if y0 < y1 else -1
         err = dx - dy
-
+        
         while True:
-            gx, gy = int(x0), int(y0)
-            if 0 <= gx < self.world.map_width and 0 <= gy < self.world.map_height:
-                self.world.world_map[gx][gy] = texture_id
-            
-            if x0 == x1 and y0 == y1:
-                break
-                
+            if 0 <= x0 < self.world.map_width and 0 <= y0 < self.world.map_height:
+                self.world.world_map[x0][y0] = texture_id
+            if x0 == x1 and y0 == y1: break
             e2 = 2 * err
             if e2 > -dy:
                 err -= dy
@@ -120,99 +124,152 @@ class GameEngine:
                 err += dx
                 y0 += sy
 
+    def find_safe_spawn(self, transform, map_w, map_h):
+        """Find non-solid spawn point nearby."""
+        px, py = int(transform.pos.x), int(transform.pos.y)
+        self.log(f"[!] Spawn ({px},{py}) is SOLID! Searching nearby...")
+        found = False
+        radius = 1
+        while not found and radius < 15:
+            for dx in range(-radius, radius + 1):
+                for dy in range(-radius, radius + 1):
+                    nx, ny = px + dx, py + dy
+                    if 0 <= nx < map_w and 0 <= ny < map_h:
+                        if self.world.world_map[nx][ny] == 0:
+                            transform.pos.x = float(nx) + 0.5
+                            transform.pos.y = float(ny) + 0.5
+                            self.log(f"[*] Safe Spawn Found at ({transform.pos.x}, {transform.pos.y})")
+                            found = True
+                            return
+            radius += 1
+
     def load_level(self, map_name="E1M1"):
-        """WAD 데이터를 읽어 그리드 맵으로 래스터화"""
-        try:
-            self.log(f"[*] Loading {map_name}...")
-            self.loader = WADLoader("assets/Doom1.WAD")
-            verts, lines, things, sides = self.loader.load_map_data(map_name)
+        print(f"Loading {map_name} with PRECISION SPAWN...")
+        
+        # 1. WAD 로드
+        self.wad_loader = WADLoader("assets/DOOM1.WAD")
+        vertices, linedefs, things, sidedefs = self.wad_loader.load_map_data(map_name)
+        
+        # 2. 맵 범위 계산
+        min_x = min(v[0] for v in vertices)
+        max_x = max(v[0] for v in vertices)
+        min_y = min(v[1] for v in vertices)
+        max_y = max(v[1] for v in vertices)
+        
+        SCALE = 0.15
+        PADDING = 20 # 맵 테두리 여유 공간
+        
+        map_width = int((max_x - min_x) * SCALE) + (PADDING * 2)
+        map_height = int((max_y - min_y) * SCALE) + (PADDING * 2)
+        
+        self.world.map_width = map_width
+        self.world.map_height = map_height
+        self.world.world_map = [[0] * map_height for _ in range(map_width)]
+        
+        # 3. 벽 그리기
+        for line in linedefs:
+            v1 = vertices[line[0]]
+            v2 = vertices[line[1]]
+            
+            x1 = int((v1[0] - min_x) * SCALE) + PADDING
+            y1 = int((v1[1] - min_y) * SCALE) + PADDING
+            x2 = int((v2[0] - min_x) * SCALE) + PADDING
+            y2 = int((v2[1] - min_y) * SCALE) + PADDING
+            
+            # Texture Lookup (Simple for now)
+            val = 1
+            right_side_idx = line[3] 
+            if right_side_idx != -1 and right_side_idx < len(sidedefs):
+                tex_name = sidedefs[right_side_idx]['mid']
+                if tex_name and tex_name != "-":
+                     val = sum(ord(c) for c in tex_name) % 8 + 1
+            
+            self.rasterize_line(x1, y1, x2, y2, val)
 
-            # 1. Scaling (Doom 100 -> Engine 20)
-            SCALE = 0.20
-            
-            min_x = min(v[0] for v in verts)
-            min_y = min(v[1] for v in verts)
-            max_x = max(v[0] for v in verts)
-            max_y = max(v[1] for v in verts)
-            
-            map_w = int((max_x - min_x) * SCALE) + 20
-            map_h = int((max_y - min_y) * SCALE) + 20
-            
-            # Pass vector data to World for debug/automap/vector-render
-            self.world.init_map(map_w, map_h, verts, lines, sides)
-            self.world.map_bounds = (min_x, min_y, SCALE) # Store scaling info
-            
-            self.log(f"[*] Map Scaled: {map_w}x{map_h} (Original Bounds: {min_x},{min_y} to {max_x},{max_y})")
+        # ---------------------------------------------------------
+        # [핵심] E1M1 정밀 스폰 로직
+        # ---------------------------------------------------------
+        # 둠 E1M1 실제 시작 좌표
+        target_raw_x = 1056
+        target_raw_y = -3616
+        target_angle = 90 # 북쪽(North)
+        
+        # 우리 맵 좌표계로 변환
+        target_px = (target_raw_x - min_x) * SCALE + PADDING
+        target_py = (target_raw_y - min_y) * SCALE + PADDING
+        
+        spawn_x, spawn_y = target_px, target_py
+        
+        # 정수로 변환해서 벽인지 확인
+        ix, iy = int(spawn_x), int(spawn_y)
+        
+        # 만약 목표 지점이 벽(>0)이라면, 주변을 살짝 뒤져서 빈 곳(0)으로 이동
+        # Safety check for bounds
+        if 0 <= ix < map_width and 0 <= iy < map_height and self.world.world_map[ix][iy] != 0:
+            print(f"[!] Target spawn ({ix}, {iy}) is blocked. Nudging player...")
+            found = False
+            # 중심에서 나선형으로 퍼지며 탐색 (최대 10칸 범위)
+            for r in range(1, 10):
+                if found: break
+                for dx in range(-r, r+1):
+                    for dy in range(-r, r+1):
+                        nx, ny = ix + dx, iy + dy
+                        if 0 <= nx < map_width and 0 <= ny < map_height:
+                            if self.world.world_map[nx][ny] == 0:
+                                # 찾았다! 빈 공간의 중심으로 이동
+                                spawn_x, spawn_y = float(nx) + 0.5, float(ny) + 0.5
+                                print(f"[*] Adjusted Spawn to ({spawn_x:.2f}, {spawn_y:.2f})")
+                                found = True
+                                break
+            if not found:
+                print("[!] CRITICAL: Could not find empty space near start point!")
+        else:
+            print(f"[*] Spawn clean at ({spawn_x:.2f}, {spawn_y:.2f})")
 
-            # 2. Rasterize LINEDEFS
-            # Import mapping helper
-            from src.utils.visual_assets import get_texture_id_from_name
-            
-            for line in lines:
-                v1, v2 = verts[line[0]], verts[line[1]]
-                x1 = (v1[0] - min_x) * SCALE + 5
-                y1 = (v1[1] - min_y) * SCALE + 5
-                x2 = (v2[0] - min_x) * SCALE + 5
-                y2 = (v2[1] - min_y) * SCALE + 5
-                
-                # Get Texture from Sidedef
-                # line format: (start, end, flags, right_side)
-                tex_idx = 1 # Default Wall
-                right_side_idx = line[3]
-                if right_side_idx != -1 and right_side_idx < len(sides):
-                    tex_name = sides[right_side_idx]['mid']
-                    # Register texture if new
-                    if tex_name not in self.world.texture_registry:
-                        self.world.texture_registry.append(tex_name)
-                    tex_idx = self.world.texture_registry.index(tex_name)
+        # ---------------------------------------------------------
+        # ECS 플레이어 생성
+        # ---------------------------------------------------------
+        from src.ecs.components import Transform
+        
+        if self.player_id is not None:
+             player_ent = self.player_id
+        else:
+             player_ent = self.world.create_entity()
+             self.player_id = player_ent
+             
+        # [Fix] Transform requires Vector3(x, y, z)
+        # Z=41.0 (Standard Player Height)
+        from src.utils.math_core import Vector3
+        self.world.add_component(player_ent, Transform(Vector3(spawn_x, spawn_y, 41.0), math.radians(target_angle)))
+        
+        # [Debug: Map Validation]
+        wall_count = sum(row.count(0) for row in self.world.world_map)
+        total_cells = map_width * map_height
+        filled_cells = total_cells - wall_count
+        self.log(f"[*] Map Stats: {filled_cells} filled cells out of {total_cells} ({filled_cells/total_cells*100:.2f}%)")
+        
+        if filled_cells == 0:
+            self.log("[!] WARNING: Map is completely empty! Rasterization failed.")
+        
+        self.log(f"[*] Level Loaded successfully.")
 
-                self.rasterize_line(int(x1), int(y1), int(x2), int(y2), tex_idx)
-
-            # 3. Player Spawn
-            player_start = next((t for t in things if t['type'] == 1), None)
-            if player_start and self.player_id is not None:
-                px = (player_start['x'] - min_x) * SCALE + 5
-                py = (player_start['y'] - min_y) * SCALE + 5
-                p_trans = self.world.get_component(self.player_id, Transform)
-                p_trans.pos.x = px
-                p_trans.pos.y = py
-                
-                # Safe Spawn Logic (Spiral Search)
-                # If spawn point is inside a wall (val > 0), search outward
-                if self.world.world_map[int(px)][int(py)] > 0:
-                    self.log(f"[!] Spawn ({int(px)},{int(py)}) is SOLID! Searching nearby...")
-                    found = False
-                    radius = 1
-                    while not found and radius < 10:
-                        for dx in range(-radius, radius + 1):
-                            for dy in range(-radius, radius + 1):
-                                nx, ny = int(px) + dx, int(py) + dy
-                                if 0 <= nx < self.world.map_width and 0 <= ny < self.world.map_height:
-                                    if self.world.world_map[nx][ny] == 0:
-                                        p_trans.pos.x = float(nx) + 0.5 # Center in cell
-                                        p_trans.pos.y = float(ny) + 0.5
-                                        px, py = p_trans.pos.x, p_trans.pos.y
-                                        found = True
-                                        self.log(f"[*] Safe Spawn Found at ({px}, {py})")
-                                        break
-                            if found: break
-                        radius += 1
-                
-                # Fix Eye Height (Was 20.0 -> Too High).
-                # Doom Guy Height ~56 units. Scale 0.2 -> 11.2
-                # Setting to 12.0 for standard eye level.
-                p_trans.pos.z = 12.0 
-                
-                p_trans.angle = (float(player_start['angle']) * PI) / 180.0
-                self.log(f"[*] Player at Grid ({px:.2f}, {py:.2f})")
-            
-            self.log(f"[*] Level Loaded successfully.")
-
-        except Exception as e:
-            self.log(f"[!] Level Load Failed: {e}")
-            import traceback
-            # Can't easily use traceback.print_exc() in raw mode without our log()
-            # but we'll try to log the error string.
+    def rasterize_line(self, x0, y0, x1, y1, val):
+        dx = abs(x1 - x0)
+        dy = abs(y1 - y0)
+        sx = 1 if x0 < x1 else -1
+        sy = 1 if y0 < y1 else -1
+        err = dx - dy
+        while True:
+            if 0 <= x0 < self.world.map_width and 0 <= y0 < self.world.map_height:
+                self.world.world_map[x0][y0] = val
+            if x0 == x1 and y0 == y1: break
+            e2 = 2 * err
+            if e2 > -dy:
+                err -= dy
+                x0 += sx
+            if e2 < dx:
+                err += dx
+                y0 += sy
 
     def init_game(self):
         """Initialize world, systems, and load level."""
@@ -226,47 +283,60 @@ class GameEngine:
         self.world.add_component(self.player_id, Stats(hp=100, armor=0, ammo=50, fuel=100.0))
         
         # Load the level map
-        self.loader = WADLoader("assets/Doom1.WAD")
-        self.load_wad_assets()
+        
+        # [Phase 7] Texture Loading
+        self.load_wad_textures()
+        
         self.load_level("E1M1")
         
         # Add systems
         self.world.add_system(input_system)
         self.world.add_system(physics_system)
 
-    def load_wad_assets(self):
-        """Load Sprites (Weapons) from WAD and convert to ASCII."""
+    def load_wad_textures(self):
+        """Parse WAD textures and preload common ones."""
         try:
-            from src.utils.visual_assets import WEAPON_ASSETS
+            self.log("[*] Loading WAD Texture Definitions...")
+            # We need a loader instance for texture lumps, even if not loading level yet.
+            if not getattr(self, 'loader', None):
+                self.loader = WADLoader("assets/DOOM1.WAD")
             
-            # 1. Shotgun Sprites (SHTG)
-            # SHTGA0 (Idle), SHTGB0 (Fire), SHTGC0/D0 (Reload)
-            sprites = {
-                "SHOTGUN_IDLE": "SHTGA0",
-                "SHOTGUN_FIRE": "SHTGB0", 
-                "SHOTGUN_PUMP1": "SHTGC0",
-                "SHOTGUN_PUMP2": "SHTGD0"
-            }
+            # WADLoader already loads pnames and texture_defs in __init__
+            if hasattr(self.loader, 'texture_defs'):
+                self.world.texture_defs = self.loader.texture_defs
+                self.log(f"[*] Use {len(self.world.texture_defs)} Texture Definitions from Loader.")
+            else:
+                self.world.texture_defs = {}
+                self.log("[!] Loader has no texture defs.")
+
+            # 3. Prebuild Common Textures (Cache)
+            # Essential Doom Textures
+            preload_list = ["STARTAN3", "BROWN96", "BIGDOOR2", "STONE2", "FLOOR7_1", "STEP1"]
+            self.world.texture_cache = {}
             
-            self.log("[*] Loading Weapon Sprites from WAD...")
+            for tex_name in preload_list:
+                if tex_name in self.world.texture_defs:
+                     # Build the grid (Note: wad_loader.py doesn't have build_texture method visible in previous view, 
+                     # but it has get_decoded_texture. Let's assume build_texture was intended to be get_decoded_texture
+                     # or we just skip this cache for now if method missing. 
+                     # Wait, get_decoded_texture returns 2D grid. So we can use that.)
+                     grid = self.loader.get_decoded_texture(tex_name)
+                     if grid:
+                         self.world.texture_cache[tex_name] = grid
+                         self.log(f"    - Cached {tex_name} ({len(grid[0])}x{len(grid)})")
+                     else:
+                         self.log(f"    - Failed to build {tex_name}")
             
-            for key, lump_name in sprites.items():
-                data = self.loader.read_lump(lump_name)
-                if data:
-                    grid = self.loader.parse_patch(data)
-                    # Scale down: Doom 320x200 -> Terminal ~80x40
-                    # Weapon sprite ~100px width -> want ~30 chars? -> 0.3
-                    ascii_art = self.loader.patch_to_ascii(grid, scale_x=0.4, scale_y=0.2)
-                    if ascii_art:
-                        WEAPON_ASSETS[key] = ascii_art
-                        self.log(f"    - Loaded {lump_name} -> {len(ascii_art)} lines.")
-                    else:
-                         self.log(f"    - Failed to convert {lump_name}.")
-                else:
-                    self.log(f"    - Lump {lump_name} not found.")
-                    
         except Exception as e:
-            self.log(f"[!] Asset Load Error: {e}")
+            self.log(f"[!] Texture Load Error: {e}")
+            import traceback
+
+    def load_wad_assets(self):
+        """
+        [DEPRECATED] WAD Sprite Loading.
+        Disabled to prevent '8888' artifact. Using visual_assets.ASCII_WEAPONS instead.
+        """
+        pass
 
     def run(self):
         try:
