@@ -94,6 +94,13 @@ python3 main.py
 - **Sprint 3**: "The Black Screen" Debugging (Solved via Block Rendering)
 - **Sprint 4**: **Braille Resurrection** & High-Res Polish (Current State)
 
+### 🛠️ Roadmap: Phase 2
+- [ ] **Interface**: HUD impl (Health, Ammo, Face).
+- [ ] **Weapons**: Shotgun/Chaingun mechanics & animation.
+- [ ] **Lighting**: Dynamic lighting, muzzle flashes.
+- [ ] **Monsters**: Enemy sprites & AI.
+- [ ] **Explosions**: VFX & particles.
+
 ---
 
 ## 📄 License
