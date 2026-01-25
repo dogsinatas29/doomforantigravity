@@ -16,8 +16,8 @@ class GameEngine:
     def __init__(self):
         self.world = World()
         self.running = False
-        self.width = 100  # Terminal Width (Standard 100x40)
-        self.height = 40  # Terminal Height
+        self.width = 156  # User Terminal Width
+        self.height = 38  # User Terminal Height
         self.frame_buffer = [[" " for _ in range(self.width)] for _ in range(self.height)]
         
         # [High-Res Internal Buffer]

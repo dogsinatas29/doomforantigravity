@@ -28,11 +28,11 @@
 This project proves that the terminal is a valid graphics context if treated correctly.
 이 프로젝트는 올바르게 다루어진다면 터미널도 훌륭한 그래픽 캔버스가 될 수 있음을 증명합니다.
 
-### 1. High-Res Braille Rendering (200x160)
+### 1. High-Res Braille Rendering (312x152)
 Instead of standard ASCII blocks (`#`, `@`), we utilize Unicode Braille Patterns (`⠀` to `⣿`) to achieve a resolution **8 times higher** than standard text.
 
-- **Internal Buffer**: The engine renders to a `200x160` virtual pixel buffer (RGB).
-- **Downsampling**: This buffer is mapped to the `100x40` terminal grid in `4x2` blocks.
+- **Internal Buffer**: The engine renders to a `312x152` virtual pixel buffer (RGB).
+- **Downsampling**: This buffer is mapped to the `156x38` terminal grid in `4x2` blocks.
 - **Bitmasking**: Each 4x2 block creates specific Braille dot patterns (`0x2800 + mask`).
 - **Visibility Guarantee**: Unlike standard braille converters, our engine separates **Structure** from **Color**. A dot exists if a wall exists, regardless of how dark it is. Walls never disappear.
 
