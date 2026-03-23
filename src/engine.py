@@ -4,13 +4,17 @@ import time
 import termios
 import tty
 from src.ecs.world import World
-from src.ecs.components import Transform, Motion, PhysicsMode, Render, Wall, Stats
+from src.ecs.components import Transform, Motion, PhysicsMode, Render, Wall, Stats, Weapon, InputState
 from src.utils.math_core import Vector3, PI
-from src.systems.input_sys import input_system
-from src.systems.physics_sys import physics_system
+from src.systems.input_sys import InputSystem
+from src.systems.physics_sys import PhysicsSystem
+from src.systems.ghost_input_sys import GhostInputSystem
 from src.systems.render_sys import render_system
 from src.systems.ui_sys import ui_system
+from src.systems.weapon_sys import WeaponSystem
 from src.utils.wad_loader import WADLoader
+from src.utils.replay_manager import ReplayManager
+from external_ghosts.reactive_ghost.ghost import ReactiveGhost
 
 class GameEngine:
     def __init__(self):
@@ -27,12 +31,21 @@ class GameEngine:
         self.virtual_buffer = [[None for _ in range(self.vw)] for _ in range(self.vh)]
         
         # Terminal state
-        self.original_termios = None
+        self.original_termios: "list | None" = None
         self.loader = None
-        self.player_id = None
-        self.player_id = None
-        self.show_automap = False # Toggle via TAB
         self.input_cooldown = 0.0 # Debounce timer
+        
+        # Replay Extension (v0.0.3 Proof of Determinism)
+        self.replay_manager = ReplayManager(self.world)
+        self.replay_mode = "NONE" # NONE, RECORDING, PLAYING
+        self.replay_offset = 0
+
+    def _read_char(self):
+        """Helper for non-blocking stdin read."""
+        import select
+        if select.select([sys.stdin], [], [], 0)[0]:
+            return sys.stdin.read(1)
+        return None
 
     def setup_terminal(self):
         """Set terminal to raw mode for non-blocking input."""
@@ -147,8 +160,8 @@ class GameEngine:
         print(f"Loading {map_name} with PRECISION SPAWN...")
         
         # 1. WAD 로드
-        self.wad_loader = WADLoader("assets/DOOM1.WAD")
-        vertices, linedefs, things, sidedefs = self.wad_loader.load_map_data(map_name)
+        self.loader = WADLoader("assets/DOOM1.WAD")
+        vertices, linedefs, things, sidedefs = self.loader.load_map_data(map_name)
         
         # 2. 맵 범위 계산
         min_x = min(v[0] for v in vertices)
@@ -253,23 +266,6 @@ class GameEngine:
         
         self.log(f"[*] Level Loaded successfully.")
 
-    def rasterize_line(self, x0, y0, x1, y1, val):
-        dx = abs(x1 - x0)
-        dy = abs(y1 - y0)
-        sx = 1 if x0 < x1 else -1
-        sy = 1 if y0 < y1 else -1
-        err = dx - dy
-        while True:
-            if 0 <= x0 < self.world.map_width and 0 <= y0 < self.world.map_height:
-                self.world.world_map[x0][y0] = val
-            if x0 == x1 and y0 == y1: break
-            e2 = 2 * err
-            if e2 > -dy:
-                err -= dy
-                x0 += sx
-            if e2 < dx:
-                err += dx
-                y0 += sy
 
     def init_game(self):
         """Initialize world, systems, and load level."""
@@ -279,8 +275,17 @@ class GameEngine:
         self.world.add_component(self.player_id, Motion(Vector3(), Vector3()))
         self.world.add_component(self.player_id, PhysicsMode())
         self.world.add_component(self.player_id, Render("@"))
-        # Phase 4: Init Stats for HUD
         self.world.add_component(self.player_id, Stats(hp=100, armor=0, ammo=50, fuel=100.0))
+        self.world.add_component(self.player_id, Weapon()) 
+        self.world.add_component(self.player_id, InputState()) # Add Input layer
+        
+        # --- Create a Ghost AI Entity ---
+        ghost_id = self.world.create_entity()
+        self.world.add_component(ghost_id, Transform(Vector3(100, 100, 41), 0.0))
+        self.world.add_component(ghost_id, Motion(Vector3(), Vector3()))
+        self.world.add_component(ghost_id, Render("G")) # G for Ghost
+        self.world.add_component(ghost_id, Weapon())
+        self.world.add_component(ghost_id, InputState()) # Controlled by GhostSystem
         
         # Load the level map
         
@@ -290,8 +295,14 @@ class GameEngine:
         self.load_level("E1M1")
         
         # Add systems
-        self.world.add_system(input_system)
-        self.world.add_system(physics_system)
+        # Add systems (Explicitly ordered for execution contract)
+        self.world.add_system(InputSystem())
+        self.world.add_system(GhostInputSystem()) # Handle AI intents
+        self.world.add_system(WeaponSystem())
+        self.world.add_system(PhysicsSystem())
+        
+        # Add Ghosts (Experiments)
+        self.world.add_ghost(ReactiveGhost())
 
     def load_wad_textures(self):
         """Parse WAD textures and preload common ones."""
@@ -361,13 +372,61 @@ class GameEngine:
                     continue
                 last_time = current_time
                 
+                self.last_char = self._read_char()
+                
                 # Update logic
                 if self.input_cooldown > 0:
                     self.input_cooldown -= dt
+                
+                # --- Replay logic ---
+                if self.replay_mode == "PLAYING":
+                    # 1. Inject recorded inputs
+                    if not self.replay_manager.play_tick(self.replay_offset):
+                        print("[*] Replay Finished.")
+                        self.replay_mode = "NONE"
+                    
+                # Standard update (Physics, AI, etc)
                 self.world.update(dt, self)
+                
+                # 2. Verification (v0.0.3 Provable)
+                if self.replay_mode == "PLAYING" and self.running:
+                    if not self.replay_manager.verify_tick(self.replay_offset):
+                        # Divergence detected! Fail playback and report why.
+                        print("\n[!!!] DETERMINISM BREACH DETECTED [!!!]")
+                        self.replay_mode = "NONE"
+                        
+                        from src.utils.hash_utils import compare_states
+                        # We need the recorded full state to diff. 
+                        # If not recorded (only hashes), we can't show diff.
+                        # For v0.0.3, we'll suggest recording with full states if needed.
+                        print("  [TIP] Use Hash verification to locate the tick, then record with high-fidelity traces.")
+                    self.replay_offset += 1
+                
+                if self.replay_mode == "RECORDING":
+                    # Record the *result* of this frame's input
+                    self.replay_manager.record_tick()
                 
                 # Render
                 self.clear_buffer()
+                
+                # Meta-command processing (After update)
+                if self.last_char:
+                    if self.last_char == 'R': # Shift + R: Start Recording
+                        self.replay_manager.start_recording()
+                        self.replay_mode = "RECORDING"
+                    elif self.last_char == 'S': # Shift + S: Stop & Save
+                        self.replay_mode = "NONE"
+                        self.replay_manager.save_replay("replays/last_replay.json")
+                    elif self.last_char == 'P': # Shift + P: Play Replay
+                        self.replay_manager.load_replay("replays/last_replay.json")
+                        self.replay_offset = self.replay_manager.seek(0, self) # Full seek from zero
+                        self.replay_mode = "PLAYING"
+                    elif self.last_char == 'G': # Shift + G: Goto + 300 (Fast Forward)
+                        if self.replay_mode == "PLAYING":
+                            target = (self.replay_offset + 300)
+                            self.replay_offset = self.replay_manager.seek(target, self)
+                            print(f"[*] Seeked to Tick {self.replay_manager.start_tick + self.replay_offset}")
+
                 if self.show_automap:
                      from src.systems.render_sys import render_automap
                      render_automap(self.world, self)

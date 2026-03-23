@@ -1,4 +1,5 @@
 import math
+import random
 from src.utils.wad_loader import TextureLoader
 from src.utils.sprite_renderer import SpriteRenderer
 
@@ -223,9 +224,9 @@ class RenderSystem:
         self.downsample_to_terminal(vw, vh)
         
         # --- UI Overlay ---
-        # self.draw_ui_overlay(vw, vh) # Re-implement later for High-Res?
-        # For now, let's skip UI or implement basic Braille UI?
-        # Let's skip UI to verify world rendering first.
+        self.draw_ui_overlay(vw, vh)
+        self.draw_face_overlay(vw, vh)
+        self.draw_weapon_overlay(vw, vh)
 
     def downsample_to_terminal(self, vw, vh):
         # Braille Mapping:
@@ -280,8 +281,22 @@ class RenderSystem:
                         self.engine.frame_buffer[ty][tx] = char
 
     def draw_weapon_overlay(self, screen_w, screen_h):
-        # Default weapon state
+        # [Weapon State Selection]
+        from src.ecs.components import Weapon
         weapon_state = "SHOTGUN_IDLE"
+        
+        try:
+            player_id = next(self.world.get_entities_with(Weapon))
+            weapon = self.world.get_component(player_id, Weapon)
+            
+            # Map Component State to Animation Frame
+            if weapon.state == "FIRE": weapon_state = "SHOTGUN_FIRE"
+            elif weapon.state == "RECOIL": weapon_state = "SHOTGUN_RECOIL"
+            elif weapon.state == "PUMP1": weapon_state = "SHOTGUN_PUMP1"
+            elif weapon.state == "PUMP2": weapon_state = "SHOTGUN_PUMP2"
+            else: weapon_state = "SHOTGUN_IDLE"
+        except StopIteration:
+            pass
         
         # Get ASCII sprite from Renderer
         sprite = self.sprite_renderer.get_weapon_sprite(weapon_state)
@@ -365,8 +380,9 @@ class RenderSystem:
         
         # Position: Center of STBAR (Bottom of screen)
         # STBAR height is 7
+        target_w = 12 # Adjusted for aspect ratio
         start_x = (screen_w - target_w) // 2
-        start_y = screen_h - target_h - 1 # 1 line padding from bottom
+        start_y = screen_h - target_h 
         
         scale_x = org_w / target_w
         scale_y = org_h / target_h

@@ -47,3 +47,20 @@ class Wall:
     x2: float
     y2: float
     texture_id: int = 1
+
+@dataclass
+class InputState:
+    """Transient user intent. Not for persistence."""
+    move_x: float = 0.0
+    move_y: float = 0.0
+    look_x: float = 0.0
+    look_y: float = 0.0
+    fire_pressed: bool = False
+    fire_trigger: bool = False # Edge pulse (Logic can use this or prev_fire)
+    prev_fire_pressed: bool = False # For edge detection in systems
+
+@dataclass
+class Weapon:
+    name: str = "SHOTGUN"
+    state: str = "IDLE"
+    cooldown: float = 0.0

@@ -1,6 +1,241 @@
 ​:rocket: DooM for AntigravitY: Final Blueprint
 ​:milky_way: 1. Project Identity
 ​Title: DooM for AntigravitY
+🚀 [LLM 코딩 원칙]
+LLM Coding Principles: 
+1. [Think Before Coding] 코딩 전 사고: 추측하지 마라. 요구사항이 모호하면 즉시 질문하고, 접근 방식과 트레이드오프(장단점)를 먼저 제시하라. 항상 가장 단순한 해결책부터 제안한다.
+2. [Simplicity First] 단순성 우선: 코드는 최소한으로 짠다. 요청하지 않은 기능이나 추상화를 추가하지 마라. 코드의 가독성과 효율성만 유지한다.
+3. [Minimal Changes] 최소한의 변경: 정밀 타격하라. 전체를 새로 쓰지 말고 필요한 부분만 정확히 수정한다. 기존 스타일을 유지하며, 내가 새로 만든 코드 중 사용되지 않는 것만 정리한다.
+4. [Goal-Oriented Execution] 목표 중심 실행: 목표 → 계획 → 구현 → 검증 순서를 엄수한다. 검증 가능한 목표를 정의하고, 단계별 계획을 세우며, 성공 기준을 명확히 확인한다.
+5. [No Hallucinated APIs] API 환각 금지: 존재하지 않는 API, 함수, 라이브러리를 날조하지 마라. 확실하지 않으면 반드시 질문한다.
+6. [Stable Code Protection] 안정 코드 보호: 이미 검증된 코드는 건드리지 마라. 오직 직접적으로 요청받은 부분만 수정하며, 가능하면 변경 사항은 diff 형식으로 제시한다.
+7. [Context Confirmation] 맥락 확인: 코드를 수정하기 전 반드시 맥락을 확인하라. 추측해서 때려 맞추지 말고, 누락된 코드나 파일이 있다면 당당하게 요청하라.
+8. [Rendering Isolation] 뷰 격리: 그래프, 파일, 플로 뷰 간 전환 시 WebGL 상태(framebuffer, shader, buffer binding)를 강제 초기화하여 시각적 간섭을 차단하라.
+
+# 🛡️ SYNAPSE Performance Constraints v0.0.3
+(Terminal / Python Doom Edition)
+
+---
+
+## 📌 Purpose
+CPU 기반 터미널 환경에서 예측 가능한 프레임 성능을 유지하면서,
+실험(LLM/Agent)을 허용하는 **상한 기반 성능 제어 규약**이다.
+
+---
+
+## 💡 Core Principle
+
+모든 연산은 반드시 **상한(Bounded Cost)** 을 가져야 한다.
+
+- 무한 성장 ❌
+- 예측 불가 ❌
+- 상한 명확 ⭕
+
+---
+
+## 1. Frame Execution Model
+
+### ⚖️ Rule
+모든 반복은 **상한이 명확해야 한다**
+
+### ✅ Allowed Bounds
+- 화면 크기 (width × height)
+- 최대 엔티티 수 (MAX_ENTITIES)
+- 고정 시스템 제한
+
+### 🚫 Forbidden
+- 상한 없는 동적 반복
+- 입력 크기에 따라 무한 증가하는 연산
+
+---
+
+## 2. Frame Budget
+
+### ⚖️ Rule
+프레임은 시간 예산 내에서 실행된다
+
+- 목표: 30~60 FPS
+- 예산: 16ms ~ 33ms
+
+### 초과 시 정책 (Soft Degradation)
+1. 일부 시스템 스킵
+2. 업데이트 주기 감소
+3. 처리 정확도 축소
+
+---
+
+## 3. System Budget (NEW)
+
+### ⚖️ Rule
+각 시스템은 독립적인 실행 예산을 가진다
+
+예:
+- render: 8ms
+- physics: 4ms
+- ai: 2ms
+
+### 목적
+- 특정 시스템의 폭주 방지
+- 전체 프레임 안정성 유지
+
+---
+
+## 4. Loop Constraints
+
+### ⚖️ Rule
+루프는 허용되지만 반드시 제한되어야 한다
+
+### ✅ Allowed
+- O(n), n = bounded
+- 제한된 O(n log n)
+
+### ⚠️ Conditional
+- O(n²) → n이 작고 고정일 때만 허용
+
+### 🚫 Forbidden
+- 상한 없는 중첩 루프
+- 종료 조건 불명확 반복
+
+---
+
+## 5. Recalculation Control
+
+### ⚖️ Rule
+상태가 변하지 않으면 계산하지 않는다
+
+### Required
+- 캐싱 (cache)
+- dirty flag
+
+### 🚫 Forbidden
+- 동일 값 반복 계산
+- 전체 상태 매 프레임 재계산
+
+---
+
+## 6. State-Driven Updates
+
+### ⚖️ Rule
+모든 로직은 상태 변화 기반으로 실행
+
+State = Input + Time + Internal State
+
+### 🚫 Forbidden
+- 상태와 무관한 연산
+- 무조건 실행되는 로직
+
+---
+
+## 7. Allocation Constraints
+
+### ⚖️ Rule
+핫 패스에서 “누적되는 메모리 할당” 금지
+
+### ✅ Allowed
+- 짧은 생명주기 객체 (event 등)
+- 재사용 가능한 버퍼 / 풀
+
+### 🚫 Forbidden
+- 프레임마다 증가하는 리스트
+- 지속적으로 쌓이는 데이터 구조
+
+---
+
+## 8. CPU Budget Protection
+
+### ⚖️ Rule
+CPU는 최소한의 제어 로직만 수행
+
+### 원칙
+- 계산 → 저장 → 재사용
+- 동일 연산 최소화
+
+---
+
+## 9. LLM Forbidden Patterns
+
+다음 패턴은 금지:
+
+- 상한 없는 동적 반복
+- 제어되지 않은 O(n²) 이상 연산
+- 핫 패스에서 누적 할당
+- 상태 변화 없는 재계산
+- 프레임 예산 무시 로직
+
+---
+
+## 10. Mandatory Review Checklist
+
+코드 승인 전 확인:
+
+- [ ] 모든 반복은 bounded 인가?
+- [ ] 프레임 예산을 초과하지 않는가?
+- [ ] 시스템별 budget이 존재하는가?
+- [ ] 불필요한 재계산이 제거되었는가?
+- [ ] 메모리 증가가 없는가?
+- [ ] 상태 기반 실행인가?
+
+---
+
+## 🔚 Final Principle
+
+1. CPU는 제한적이다  
+2. 프레임 유지가 최우선이다  
+3. 반복은 비용이다  
+4. 상태 변화만 실행을 트리거한다  
+5. 모든 연산은 상한 내에서 수행되어야 한다  
+
+
+## 엔진 제한 사항
+1. Rule 1 — Core는 “순수 Python만”
+src/
+  ecs/
+  systems/
+  renderer/
+
+→ 여긴 절대 외부 라이브러리 금지
+
+2. Rule 2 — Ghost에서만 의존성 허용 (선택적)
+external_ghosts/
+  ai_agent/   # 여기만 openai 같은거 허용
+
+→ 그리고:
+
+Core는 Ghost를 모르면 됨
+
+3. Rule 3 — Renderer도 표준 출력만
+print("\033[H")  # ANSI cursor
+
+→ 이 선 넘으면 바로 dependency 필요해짐
+
+4. 추천 전략 (중요)
+
+4-1. 완전 0 dependency를 고집하는 대신:
+
+👉 “2 레이어 정책”이 더 현실적
+Layer 1 — Core (Strict 0)
+ECS
+Renderer (ANSI)
+Game loop
+Layer 2 — Extensions (Loose)
+AI
+분석 툴
+실험
+4-2. 이 선택의 장단점
+장점
+배포 쉬움 (python만 있으면 실행)
+LLM 실험에 유리
+디버깅 단순
+단점
+성능 제한
+렌더링 한계
+생산성 일부 희생
+
+## 핵심 변화 요약 (의도)
+
+- O(1 강제 제거 → 고정 크기 + 예산 기반)
+- 루프 금지 제거 → 제어된 루프 허용
+- GPU 전제 제거 → CPU 최적화 구조로 전환
 
 ​Concept: Classic Doom Resources + Quake Physics + Zero-G Mechanics.
 

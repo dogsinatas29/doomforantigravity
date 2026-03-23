@@ -1,0 +1,1056 @@
+{
+  "canvas_state": {
+    "offset": {
+      "x": 0,
+      "y": 0
+    },
+    "visible_layers": [
+      "source",
+      "documentation"
+    ],
+    "zoom_level": 1
+  },
+  "clusters": [
+    {
+      "bounds": {
+        "height": 0,
+        "width": 0,
+        "x": 0,
+        "y": 0
+      },
+      "children": [
+        "node_src_engine_py_1774267208148"
+      ],
+      "collapsed": false,
+      "id": "cluster_src",
+      "label": "src"
+    },
+    {
+      "bounds": {
+        "height": 0,
+        "width": 0,
+        "x": 0,
+        "y": 0
+      },
+      "children": [
+        "node_temp_analysis_balance_tuner_py_1774267208148",
+        "node_temp_analysis_ecs_py_1774267208148",
+        "node_temp_analysis_inventory_py_1774267208148",
+        "node_temp_analysis_items_py_1774267208148",
+        "node_temp_analysis_map_py_1774267208148",
+        "node_temp_analysis_monster_py_1774267208148",
+        "node_temp_analysis_skills_py_1774267208148"
+      ],
+      "collapsed": false,
+      "id": "cluster_temp_analysis",
+      "label": "temp_analysis"
+    },
+    {
+      "bounds": {
+        "height": 0,
+        "width": 0,
+        "x": 0,
+        "y": 0
+      },
+      "children": [
+        "node_src_ecs_components_py_1774267208148",
+        "node_src_ecs_world_py_1774267208148"
+      ],
+      "collapsed": false,
+      "id": "cluster_src_ecs",
+      "label": "ecs",
+      "parent_id": "cluster_src"
+    },
+    {
+      "bounds": {
+        "height": 0,
+        "width": 0,
+        "x": 0,
+        "y": 0
+      },
+      "children": [
+        "node_src_systems_input_sys_py_1774267208148",
+        "node_src_systems_physics_sys_py_1774267208148",
+        "node_src_systems_render_sys_py_1774267208148",
+        "node_src_systems_ui_sys_py_1774267208148"
+      ],
+      "collapsed": false,
+      "id": "cluster_src_systems",
+      "label": "systems",
+      "parent_id": "cluster_src"
+    },
+    {
+      "bounds": {
+        "height": 0,
+        "width": 0,
+        "x": 0,
+        "y": 0
+      },
+      "children": [
+        "node_src_types_schema_ts_1774267208148"
+      ],
+      "collapsed": false,
+      "id": "cluster_src_types",
+      "label": "types",
+      "parent_id": "cluster_src"
+    },
+    {
+      "bounds": {
+        "height": 0,
+        "width": 0,
+        "x": 0,
+        "y": 0
+      },
+      "children": [
+        "node_src_utils_ascii_texture_gen_py_1774267208148",
+        "node_src_utils_math_core_py_1774267208148",
+        "node_src_utils_sprite_renderer_py_1774267208148",
+        "node_src_utils_visual_assets_py_1774267208148",
+        "node_src_utils_wad_loader_py_1774267208148"
+      ],
+      "collapsed": false,
+      "id": "cluster_src_utils",
+      "label": "utils",
+      "parent_id": "cluster_src"
+    },
+    {
+      "bounds": {
+        "height": 0,
+        "width": 0,
+        "x": 0,
+        "y": 1500
+      },
+      "children": [
+        "node_analyze_project_py_1774267208148",
+        "node_debug_deep_py_1774267208148",
+        "node_debug_textures_py_1774267208148",
+        "node_dump_map_ascii_py_1774267208148",
+        "node_gdrive_mcp_py_1774267208148",
+        "node_generate_detailed_docs_py_1774267208148",
+        "node_generate_test_wad_py_1774267208148",
+        "node_git_push_sh_1774267208148",
+        "node_inspect_folder_py_1774267208148",
+        "node_main_py_1774267208148",
+        "node_manage_docs_py_1774267208148",
+        "node_run_game_sh_1774267208148",
+        "node_upload_guide_py_1774267208148",
+        "node_verify_sprites_py_1774267208148",
+        "node_verify_texture_color_py_1774267208148"
+      ],
+      "collapsed": false,
+      "id": "cluster_root",
+      "label": "🏠 Project Root"
+    },
+    {
+      "bounds": {
+        "height": 600,
+        "width": 800,
+        "x": -200,
+        "y": 1100
+      },
+      "children": [
+        "node_GEMINI_md_1774267208148",
+        "node_RULES_md_1774267208148",
+        "node_gemini_performance_constraints_terminal_md_1774267208148"
+      ],
+      "collapsed": true,
+      "id": "doc_shelf",
+      "label": "📚 Documentation Shelf"
+    }
+  ],
+  "edges": [
+    {
+      "data": {
+        "dtr": 0
+      },
+      "from": "node_upload_guide_py_1774267208148",
+      "id": "edge_auto_1774267208182_370913",
+      "is_approved": true,
+      "label": "reference",
+      "to": "node_gdrive_mcp_py_1774267208148",
+      "type": "reference",
+      "visual": {
+        "color": "#888",
+        "opacity": 0.8,
+        "style": "solid"
+      }
+    },
+    {
+      "data": {
+        "dtr": 0
+      },
+      "from": "node_generate_detailed_docs_py_1774267208148",
+      "id": "edge_auto_1774267208182_54923",
+      "is_approved": true,
+      "label": "reference",
+      "to": "node_gdrive_mcp_py_1774267208148",
+      "type": "reference",
+      "visual": {
+        "color": "#888",
+        "opacity": 0.8,
+        "style": "solid"
+      }
+    },
+    {
+      "data": {
+        "dtr": 0
+      },
+      "from": "node_analyze_project_py_1774267208148",
+      "id": "edge_auto_1774267208182_728293",
+      "is_approved": true,
+      "label": "reference",
+      "to": "node_gdrive_mcp_py_1774267208148",
+      "type": "reference",
+      "visual": {
+        "color": "#888",
+        "opacity": 0.8,
+        "style": "solid"
+      }
+    },
+    {
+      "data": {
+        "dtr": 0
+      },
+      "from": "node_inspect_folder_py_1774267208148",
+      "id": "edge_auto_1774267208182_815877",
+      "is_approved": true,
+      "label": "reference",
+      "to": "node_gdrive_mcp_py_1774267208148",
+      "type": "reference",
+      "visual": {
+        "color": "#888",
+        "opacity": 0.8,
+        "style": "solid"
+      }
+    },
+    {
+      "data": {
+        "dtr": 0
+      },
+      "from": "node_manage_docs_py_1774267208148",
+      "id": "edge_auto_1774267208182_832335",
+      "is_approved": true,
+      "label": "reference",
+      "to": "node_gdrive_mcp_py_1774267208148",
+      "type": "reference",
+      "visual": {
+        "color": "#888",
+        "opacity": 0.8,
+        "style": "solid"
+      }
+    }
+  ],
+  "gemini_md_path": "/home/dogsinatas/python_project2/GEMINI.md",
+  "nodes": [
+    {
+      "data": {
+        "cluster_id": "doc_shelf",
+        "color": "#fabd2f",
+        "description": "GEMINI.md (Doc)",
+        "file": "GEMINI.md",
+        "label": "GEMINI.md",
+        "layer": 0,
+        "priority": 1
+      },
+      "id": "node_GEMINI_md_1774267208148",
+      "position": {
+        "x": -200,
+        "y": 1100
+      },
+      "status": "proposed",
+      "type": "documentation",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "doc_shelf",
+        "color": "#fabd2f",
+        "description": "RULES.md (Doc)",
+        "file": "RULES.md",
+        "label": "RULES.md",
+        "layer": 0,
+        "priority": 1
+      },
+      "id": "node_RULES_md_1774267208148",
+      "position": {
+        "x": 0,
+        "y": 1100
+      },
+      "status": "proposed",
+      "type": "documentation",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_root",
+        "color": "#b8bb26",
+        "description": "analyze_project.py (Auto-detected)",
+        "file": "analyze_project.py",
+        "label": "analyze_project.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_analyze_project_py_1774267208148",
+      "position": {
+        "x": 1453.508483608783,
+        "y": 3202.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_root",
+        "color": "#b8bb26",
+        "description": "debug_deep.py (Auto-detected)",
+        "file": "debug_deep.py",
+        "label": "debug_deep.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_debug_deep_py_1774267208148",
+      "position": {
+        "x": 1242.7950614908555,
+        "y": 3202.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_root",
+        "color": "#b8bb26",
+        "description": "debug_textures.py (Auto-detected)",
+        "file": "debug_textures.py",
+        "label": "debug_textures.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_debug_textures_py_1774267208148",
+      "position": {
+        "x": 1616.485105465753,
+        "y": 3202.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_root",
+        "color": "#b8bb26",
+        "description": "dump_map_ascii.py (Auto-detected)",
+        "file": "dump_map_ascii.py",
+        "label": "dump_map_ascii.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_dump_map_ascii_py_1774267208148",
+      "position": {
+        "x": 1420.1827159246711,
+        "y": 3202.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_root",
+        "color": "#b8bb26",
+        "description": "gdrive_mcp.py (Auto-detected)",
+        "file": "gdrive_mcp.py",
+        "label": "gdrive_mcp.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_gdrive_mcp_py_1774267208148",
+      "position": {
+        "x": 1355.4966901761434,
+        "y": 3202.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "doc_shelf",
+        "color": "#fabd2f",
+        "description": "gemini_performance_constraints_terminal.md (Doc)",
+        "file": "gemini_performance_constraints_terminal.md",
+        "label": "gemini_performance_constraints_terminal.md",
+        "layer": 0,
+        "priority": 1
+      },
+      "id": "node_gemini_performance_constraints_terminal_md_1774267208148",
+      "position": {
+        "x": 400,
+        "y": 1250
+      },
+      "status": "proposed",
+      "type": "documentation",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_root",
+        "color": "#b8bb26",
+        "description": "generate_detailed_docs.py (Auto-detected)",
+        "file": "generate_detailed_docs.py",
+        "label": "generate_detailed_docs.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_generate_detailed_docs_py_1774267208148",
+      "position": {
+        "x": 1843.702763277764,
+        "y": 3202.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_root",
+        "color": "#b8bb26",
+        "description": "generate_test_wad.py (Auto-detected)",
+        "file": "generate_test_wad.py",
+        "label": "generate_test_wad.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_generate_test_wad_py_1774267208148",
+      "position": {
+        "x": 787.8771411117556,
+        "y": 3202.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_root",
+        "color": "#b8bb26",
+        "description": "git_push.sh (Auto-detected)",
+        "file": "git_push.sh",
+        "label": "git_push.sh",
+        "layer": 1,
+        "priority": 50
+      },
+      "id": "node_git_push_sh_1774267208148",
+      "position": {
+        "x": 1015.6614564078033,
+        "y": 3202.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_root",
+        "color": "#b8bb26",
+        "description": "inspect_folder.py (Auto-detected)",
+        "file": "inspect_folder.py",
+        "label": "inspect_folder.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_inspect_folder_py_1774267208148",
+      "position": {
+        "x": 1558.665664070784,
+        "y": 3202.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_root",
+        "color": "#b8bb26",
+        "description": "main.py (Auto-detected)",
+        "file": "main.py",
+        "label": "main.py",
+        "layer": 0,
+        "priority": 5
+      },
+      "id": "node_main_py_1774267208148",
+      "position": {
+        "x": 1860.6882917889593,
+        "y": 3183.4472518300613
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_root",
+        "color": "#b8bb26",
+        "description": "manage_docs.py (Auto-detected)",
+        "file": "manage_docs.py",
+        "label": "manage_docs.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_manage_docs_py_1774267208148",
+      "position": {
+        "x": 1679.1811086900939,
+        "y": 3202.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_root",
+        "color": "#b8bb26",
+        "description": "run_game.sh (Auto-detected)",
+        "file": "run_game.sh",
+        "label": "run_game.sh",
+        "layer": 1,
+        "priority": 50
+      },
+      "id": "node_run_game_sh_1774267208148",
+      "position": {
+        "x": 1208.7505333421714,
+        "y": 3202.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_root",
+        "color": "#b8bb26",
+        "description": "upload_guide.py (Auto-detected)",
+        "file": "upload_guide.py",
+        "label": "upload_guide.py",
+        "layer": 2,
+        "priority": 80
+      },
+      "id": "node_upload_guide_py_1774267208148",
+      "position": {
+        "x": 775.3196806711552,
+        "y": 3202.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_root",
+        "color": "#b8bb26",
+        "description": "verify_sprites.py (Auto-detected)",
+        "file": "verify_sprites.py",
+        "label": "verify_sprites.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_verify_sprites_py_1774267208148",
+      "position": {
+        "x": 1097.0022586186776,
+        "y": 3202.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_root",
+        "color": "#b8bb26",
+        "description": "verify_texture_color.py (Auto-detected)",
+        "file": "verify_texture_color.py",
+        "label": "verify_texture_color.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_verify_texture_color_py_1774267208148",
+      "position": {
+        "x": 914.5136782191669,
+        "y": 3202.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_src_ecs",
+        "color": "#b8bb26",
+        "description": "components.py (Auto-detected)",
+        "file": "src/ecs/components.py",
+        "label": "components.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_src_ecs_components_py_1774267208148",
+      "position": {
+        "x": -654.9879019164176,
+        "y": 3202.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_src_ecs",
+        "color": "#b8bb26",
+        "description": "world.py (Auto-detected)",
+        "file": "src/ecs/world.py",
+        "label": "world.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_src_ecs_world_py_1774267208148",
+      "position": {
+        "x": -444.5717627187946,
+        "y": 3202.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_src",
+        "color": "#b8bb26",
+        "description": "engine.py (Auto-detected)",
+        "file": "src/engine.py",
+        "label": "engine.py",
+        "layer": 1,
+        "priority": 25
+      },
+      "id": "node_src_engine_py_1774267208148",
+      "position": {
+        "x": 530.7407294345721,
+        "y": 3202.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_src_systems",
+        "color": "#b8bb26",
+        "description": "input_sys.py (Auto-detected)",
+        "file": "src/systems/input_sys.py",
+        "label": "input_sys.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_src_systems_input_sys_py_1774267208148",
+      "position": {
+        "x": 32.15738092500174,
+        "y": 3442.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_src_systems",
+        "color": "#b8bb26",
+        "description": "physics_sys.py (Auto-detected)",
+        "file": "src/systems/physics_sys.py",
+        "label": "physics_sys.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_src_systems_physics_sys_py_1774267208148",
+      "position": {
+        "x": -72.37254349207865,
+        "y": 3442.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_src_systems",
+        "color": "#b8bb26",
+        "description": "render_sys.py (Auto-detected)",
+        "file": "src/systems/render_sys.py",
+        "label": "render_sys.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_src_systems_render_sys_py_1774267208148",
+      "position": {
+        "x": -185.28355733085897,
+        "y": 3442.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_src_systems",
+        "color": "#b8bb26",
+        "description": "ui_sys.py (Auto-detected)",
+        "file": "src/systems/ui_sys.py",
+        "label": "ui_sys.py",
+        "layer": 2,
+        "priority": 80
+      },
+      "id": "node_src_systems_ui_sys_py_1774267208148",
+      "position": {
+        "x": -215.41119823807776,
+        "y": 3442.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_src_types",
+        "color": "#b8bb26",
+        "description": "schema.ts (Auto-detected)",
+        "file": "src/types/schema.ts",
+        "label": "schema.ts",
+        "layer": 1,
+        "priority": 50
+      },
+      "id": "node_src_types_schema_ts_1774267208148",
+      "position": {
+        "x": 529.5267640101436,
+        "y": 3288.5761626627377
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_src_utils",
+        "color": "#b8bb26",
+        "description": "ascii_texture_gen.py (Auto-detected)",
+        "file": "src/utils/ascii_texture_gen.py",
+        "label": "ascii_texture_gen.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_src_utils_ascii_texture_gen_py_1774267208148",
+      "position": {
+        "x": -60.0137343634327,
+        "y": 3322.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_src_utils",
+        "color": "#b8bb26",
+        "description": "math_core.py (Auto-detected)",
+        "file": "src/utils/math_core.py",
+        "label": "math_core.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_src_utils_math_core_py_1774267208148",
+      "position": {
+        "x": 79.1791305125049,
+        "y": 3322.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_src_utils",
+        "color": "#b8bb26",
+        "description": "sprite_renderer.py (Auto-detected)",
+        "file": "src/utils/sprite_renderer.py",
+        "label": "sprite_renderer.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_src_utils_sprite_renderer_py_1774267208148",
+      "position": {
+        "x": -95.83694106470658,
+        "y": 3322.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_src_utils",
+        "color": "#b8bb26",
+        "description": "visual_assets.py (Auto-detected)",
+        "file": "src/utils/visual_assets.py",
+        "label": "visual_assets.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_src_utils_visual_assets_py_1774267208148",
+      "position": {
+        "x": 304.92529186560745,
+        "y": 3275.987431554705
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_src_utils",
+        "color": "#b8bb26",
+        "description": "wad_loader.py (Auto-detected)",
+        "file": "src/utils/wad_loader.py",
+        "label": "wad_loader.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_src_utils_wad_loader_py_1774267208148",
+      "position": {
+        "x": 165.18670213903692,
+        "y": 3322.614593260813
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_temp_analysis",
+        "color": "#b8bb26",
+        "description": "balance_tuner.py (Auto-detected)",
+        "file": "temp_analysis/balance_tuner.py",
+        "label": "balance_tuner.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_temp_analysis_balance_tuner_py_1774267208148",
+      "position": {
+        "x": -1114.4976926821012,
+        "y": 2421.266508432283
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_temp_analysis",
+        "color": "#b8bb26",
+        "description": "ecs.py (Auto-detected)",
+        "file": "temp_analysis/ecs.py",
+        "label": "ecs.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_temp_analysis_ecs_py_1774267208148",
+      "position": {
+        "x": -1170.1023075322908,
+        "y": 2324.8562308307423
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_temp_analysis",
+        "color": "#b8bb26",
+        "description": "inventory.py (Auto-detected)",
+        "file": "temp_analysis/inventory.py",
+        "label": "inventory.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_temp_analysis_inventory_py_1774267208148",
+      "position": {
+        "x": -1076.2314051457636,
+        "y": 2539.9647510505392
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_temp_analysis",
+        "color": "#b8bb26",
+        "description": "items.py (Auto-detected)",
+        "file": "temp_analysis/items.py",
+        "label": "items.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_temp_analysis_items_py_1774267208148",
+      "position": {
+        "x": -1400.4263626165678,
+        "y": 2109.524376235332
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_temp_analysis",
+        "color": "#b8bb26",
+        "description": "map.py (Auto-detected)",
+        "file": "temp_analysis/map.py",
+        "label": "map.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_temp_analysis_map_py_1774267208148",
+      "position": {
+        "x": -1103.7438371764486,
+        "y": 2002.5671730280494
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_temp_analysis",
+        "color": "#b8bb26",
+        "description": "monster.py (Auto-detected)",
+        "file": "temp_analysis/monster.py",
+        "label": "monster.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_temp_analysis_monster_py_1774267208148",
+      "position": {
+        "x": -1078.2592280070933,
+        "y": 1900.3216180753213
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    },
+    {
+      "data": {
+        "cluster_id": "cluster_temp_analysis",
+        "color": "#b8bb26",
+        "description": "skills.py (Auto-detected)",
+        "file": "temp_analysis/skills.py",
+        "label": "skills.py",
+        "layer": 1,
+        "priority": 30
+      },
+      "id": "node_temp_analysis_skills_py_1774267208148",
+      "position": {
+        "x": -1416.6705709249811,
+        "y": 2407.5951945433285
+      },
+      "status": "proposed",
+      "type": "source",
+      "visual": {
+        "opacity": 0.5
+      }
+    }
+  ],
+  "project_name": "python_project2",
+  "view": {
+    "offsetX": 475.05529313212253,
+    "offsetY": -625.5940753515755,
+    "zoom": 0.40108877271078686
+  },
+  "_iron_guard": {
+    "version": "0.2.18.1",
+    "byte_size": 17556,
+    "encoding": "UTF-8",
+    "alignment": 8
+  }
+}
